@@ -1,0 +1,145 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:uuid/uuid.dart';
+import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+
+import '../models/food_item.dart';
+import '../providers/food_store.dart';
+import '../models/app_theme.dart';
+
+class AddItemScreen extends StatefulWidget {
+  const AddItemScreen({super.key});
+
+  @override
+  State<AddItemScreen> createState() => _AddItemScreenState();
+}
+
+class _AddItemScreenState extends State<AddItemScreen> {
+  final _nameCtrl = TextEditingController();
+
+  String _category = AppTheme.categories.first;
+  String _location = AppTheme.locations.first;
+
+  DateTime _expiryDate = DateTime.now().add(const Duration(days: 7));
+  DateTime _purchaseDate = DateTime.now();
+
+  int _quantity = 1;
+
+  final _fmt = DateFormat('dd/MM/yyyy');
+
+  final ImagePicker _picker = ImagePicker();
+  XFile? _image;
+
+  Future<void> pickImage() async {
+    final picked = await _picker.pickImage(source: ImageSource.camera);
+
+    if (picked != null) {
+      setState(() {
+        _image = picked;
+      });
+    }
+  }
+
+  Future<void> _pickDate(bool isExpiry) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: isExpiry ? _expiryDate : _purchaseDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+
+    if (picked != null) {
+      setState(() {
+        if (isExpiry) {
+          _expiryDate = picked;
+        } else {
+          _purchaseDate = picked;
+        }
+      });
+    }
+  }
+
+  void _save() {
+    if (_nameCtrl.text.trim().isEmpty) return;
+
+    final item = FoodItem(
+      id: const Uuid().v4(),
+      name: _nameCtrl.text.trim(),
+      category: _category,
+      location: _location,
+      expiryDate: _expiryDate,
+      purchaseDate: _purchaseDate,
+      quantity: _quantity,
+      imageUrl: _image?.path, // ✅ correct
+    );
+
+    context.read<FoodStore>().addItem(item);
+
+    Navigator.pop(context);
+  }
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundGreen,
+      appBar: AppBar(
+        title: const Text("Add Item"),
+        backgroundColor: AppTheme.primaryGreen,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+
+            // 📸 IMAGE PICKER
+            GestureDetector(
+              onTap: pickImage,
+              child: CircleAvatar(
+                radius: 55,
+                backgroundColor: AppTheme.lightGreen,
+                backgroundImage:
+                    _image != null ? FileImage(File(_image!.path)) : null,
+                child: _image == null
+                    ? const Icon(Icons.camera_alt,
+                        size: 40, color: AppTheme.primaryGreen)
+                    : null,
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // NAME
+            TextField(
+              controller: _nameCtrl,
+              decoration: const InputDecoration(
+                hintText: "Product name",
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // SAVE BUTTON
+            ElevatedButton(
+              onPressed: _save,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primaryGreen,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(double.infinity, 50),
+              ),
+              child: const Text("Save"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

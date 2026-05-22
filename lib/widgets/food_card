@@ -1,0 +1,43 @@
+import 'dart:io';
+import 'package:flutter/material.dart';
+import '../models/food_item.dart';
+import '../models/app_theme.dart';
+
+class FoodCard extends StatelessWidget {
+  final FoodItem item;
+  final VoidCallback? onTap;
+
+  const FoodCard({super.key, required this.item, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 110,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                child: item.imageUrl == null
+                    ? Center(child: Text(AppTheme.categoryIcon(item.category)))
+                    : item.imageUrl!.startsWith('http')
+                        ? Image.network(item.imageUrl!, fit: BoxFit.cover)
+                        : Image.file(File(item.imageUrl!), fit: BoxFit.cover),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(6),
+              child: Text(item.name, overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
