@@ -18,15 +18,35 @@ class AddItemScreen extends StatefulWidget {
 
 class _AddItemScreenState extends State<AddItemScreen> {
   final _nameCtrl = TextEditingController();
-  final _qtyCtrl = TextEditingController(text: "1");
 
   final picker = ImagePicker();
   XFile? image;
 
+  int quantity = 1;
+
   DateTime purchaseDate = DateTime.now();
   DateTime expiryDate = DateTime.now().add(const Duration(days: 7));
 
+  String category = "General";
+  String location = "Fridge";
+
   final fmt = DateFormat('dd/MM/yyyy');
+
+  final List<String> categories = [
+    "Fruits",
+    "Vegetables",
+    "Dairy",
+    "Meat",
+    "Pasta",
+    "General",
+  ];
+
+  final List<String> locations = [
+    "Fridge",
+    "Freezer",
+    "Pantry",
+    "Counter",
+  ];
 
   Future<void> pickImage() async {
     final picked = await picker.pickImage(source: ImageSource.camera);
@@ -54,17 +74,22 @@ class _AddItemScreenState extends State<AddItemScreen> {
     }
   }
 
+  void _inc() => setState(() => quantity++);
+  void _dec() {
+    if (quantity > 1) setState(() => quantity--);
+  }
+
   void _save() {
     if (_nameCtrl.text.trim().isEmpty) return;
 
     final item = FoodItem(
       id: const Uuid().v4(),
       name: _nameCtrl.text.trim(),
-      category: "General",
-      location: "Fridge",
-      quantity: int.tryParse(_qtyCtrl.text) ?? 1,
-      purchaseDate: purchaseDate,
+      category: category,
+      location: location,
       expiryDate: expiryDate,
+      purchaseDate: purchaseDate,
+      quantity: quantity,
       imageUrl: image?.path,
     );
 
@@ -75,13 +100,17 @@ class _AddItemScreenState extends State<AddItemScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Add Item")),
+      appBar: AppBar(
+        title: const Text("Add Item"),
+        backgroundColor: Colors.green,
+        foregroundColor: Colors.white,
+      ),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
+            // IMAGE
             GestureDetector(
               onTap: pickImage,
               child: CircleAvatar(
@@ -89,26 +118,76 @@ class _AddItemScreenState extends State<AddItemScreen> {
                 backgroundImage:
                     image != null ? FileImage(File(image!.path)) : null,
                 child: image == null
-                    ? const Icon(Icons.camera_alt)
+                    ? const Icon(Icons.camera_alt, color: Colors.white)
                     : null,
               ),
             ),
 
             const SizedBox(height: 20),
 
+            // NAME
             TextField(
               controller: _nameCtrl,
               decoration: const InputDecoration(labelText: "Name"),
             ),
 
-            TextField(
-              controller: _qtyCtrl,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: "Quantity"),
+            const SizedBox(height: 10),
+
+            // CATEGORY
+            DropdownButtonFormField(
+              value: category,
+              items: categories
+                  .map((c) => DropdownMenuItem(
+                        value: c,
+                        child: Text(c),
+                      ))
+                  .toList(),
+              onChanged: (v) => setState(() => category = v!),
+              decoration: const InputDecoration(labelText: "Category"),
             ),
 
             const SizedBox(height: 10),
 
+            // LOCATION
+            DropdownButtonFormField(
+              value: location,
+              items: locations
+                  .map((l) => DropdownMenuItem(
+                        value: l,
+                        child: Text(l),
+                      ))
+                  .toList(),
+              onChanged: (v) => setState(() => location = v!),
+              decoration: const InputDecoration(labelText: "Location"),
+            ),
+
+            const SizedBox(height: 20),
+
+            // QUANTITY
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(
+                  onPressed: _dec,
+                  icon: const Icon(Icons.remove_circle_outline),
+                  color: Colors.green,
+                ),
+                Text(
+                  "$quantity",
+                  style: const TextStyle(
+                      fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+                IconButton(
+                  onPressed: _inc,
+                  icon: const Icon(Icons.add_circle_outline),
+                  color: Colors.green,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // DATES
             ListTile(
               title: Text("Purchase: ${fmt.format(purchaseDate)}"),
               trailing: const Icon(Icons.date_range),
@@ -123,10 +202,27 @@ class _AddItemScreenState extends State<AddItemScreen> {
 
             const SizedBox(height: 20),
 
-            ElevatedButton(
-              onPressed: _save,
-              child: const Text("Save Item"),
-            ),
+            // SAVE
+SizedBox(
+  width: double.infinity,
+  child: ElevatedButton(
+    onPressed: _save,
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.green, //
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+    child: const Text(
+      "Save Item",
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
           ],
         ),
       ),

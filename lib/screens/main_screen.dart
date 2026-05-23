@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'home_screen.dart';
 import 'inventory_screen.dart';
+import 'categories_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -11,40 +12,45 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-
-  int _currentIndex = 0;
+  int _index = 0;
 
   final List<Widget> _pages = const [
     HomeScreen(),
     InventoryScreen(),
+    CategoriesScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
-
-      body: _pages[_currentIndex],
+      body: _pages[_index],
 
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _index,
 
-        onTap: (index) {
+        onTap: (i) {
           setState(() {
-            _currentIndex = index;
+            _index = i;
           });
         },
 
-        items: const [
+        selectedItemColor: Colors.green,
+        unselectedItemColor: Colors.grey,
 
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: "Home",
           ),
 
           BottomNavigationBarItem(
             icon: Icon(Icons.inventory_2),
-            label: 'Inventory',
+            label: "Inventory",
+          ),
+
+          BottomNavigationBarItem(
+            icon: Icon(Icons.kitchen),
+            label: "Storage",
           ),
         ],
       ),
