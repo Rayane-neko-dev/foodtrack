@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/app_theme.dart';
-import 'home_screen.dart';
 import 'main_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
@@ -13,35 +14,38 @@ class SplashScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top decorative circles
+            // TOP DECORATION
             Stack(
+              clipBehavior: Clip.none,
               children: [
                 Container(
-                  height: 120,
+                  height: 160,
                   width: double.infinity,
                   color: AppTheme.backgroundGreen,
                 ),
+
                 Positioned(
-                  top: -30,
-                  left: -30,
+                  top: -40,
+                  left: -40,
                   child: Container(
-                    width: 160,
-                    height: 160,
+                    width: 180,
+                    height: 180,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.primaryGreen.withOpacity(0.5),
+                      color: AppTheme.primaryGreen.withOpacity(0.35),
                     ),
                   ),
                 ),
+
                 Positioned(
-                  top: -10,
-                  left: 60,
+                  top: 20,
+                  left: 90,
                   child: Container(
-                    width: 100,
-                    height: 100,
+                    width: 110,
+                    height: 110,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: AppTheme.accentGreen.withOpacity(0.35),
+                      color: AppTheme.accentGreen.withOpacity(0.25),
                     ),
                   ),
                 ),
@@ -50,34 +54,13 @@ class SplashScreen extends StatelessWidget {
 
             const Spacer(),
 
-            // Phone mockup
-            Container(
-              width: 200,
-              height: 200,
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    width: 130,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppTheme.darkGreen, width: 3),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(10),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _mock(Icons.liquor_outlined, AppTheme.darkGreen),
-                          const SizedBox(height: 8),
-                          _mock(Icons.egg_alt_outlined, AppTheme.accentGreen),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
+            // SVG ILLUSTRATION
+            SizedBox(
+              width: 260,
+              height: 260,
+              child: SvgPicture.asset(
+                'assets/images/undraw_online-groceries_n03y.svg',
+                fit: BoxFit.contain,
               ),
             ),
 
@@ -106,12 +89,16 @@ class SplashScreen extends StatelessWidget {
 
             const Spacer(),
 
+            // BUTTON
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
+                  onPressed: () async {
+                    final prefs = await SharedPreferences.getInstance();
+                    await prefs.setBool("seenSplash", true);
+
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
                         builder: (_) => const MainScreen(),
@@ -119,7 +106,7 @@ class SplashScreen extends StatelessWidget {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryGreen,
+                    backgroundColor: const Color(0xFF608F20),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -128,7 +115,10 @@ class SplashScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Get started',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -138,17 +128,6 @@ class SplashScreen extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _mock(IconData icon, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: AppTheme.backgroundGreen,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Icon(icon, color: color, size: 28),
     );
   }
 }
